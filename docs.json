@@ -1,0 +1,138 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "ByVeya Platform API",
+  "colors": {
+    "primary": "#6C3AE3",
+    "light": "#A78BFA",
+    "dark": "#4F1FBF"
+  },
+  "favicon": "favicon.svg",
+  "navigation": {
+    "anchors": [
+      {
+        "anchor": "Documentation",
+        "icon": "book-open",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "introduction",
+                  "quickstart",
+                  "authentication"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "guides/permissions",
+                  "guides/rate-limits",
+                  "guides/webhooks",
+                  "guides/errors"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "groups": [
+              {
+                "group": "API Reference",
+                "pages": [
+                  {
+                    "group": "Platform",
+                    "pages": [
+                      "api-reference/platform/get-authenticated-platform-info"
+                    ]
+                  },
+                  {
+                    "group": "Marketing",
+                    "pages": [
+                      "api-reference/marketing/list-email-campaigns",
+                      "api-reference/marketing/create-an-email-campaign",
+                      "api-reference/marketing/get-a-campaign"
+                    ]
+                  },
+                  {
+                    "group": "Social",
+                    "pages": [
+                      "api-reference/social/list-social-posts",
+                      "api-reference/social/schedule-a-social-post",
+                      "api-reference/social/get-social-analytics-summary"
+                    ]
+                  },
+                  {
+                    "group": "SMS",
+                    "pages": [
+                      "api-reference/sms/send-an-sms"
+                    ]
+                  },
+                  {
+                    "group": "Email",
+                    "pages": [
+                      "api-reference/email/send-a-transactional-email"
+                    ]
+                  },
+                  {
+                    "group": "Letters",
+                    "pages": [
+                      "api-reference/letters/generate-branded-letters"
+                    ]
+                  },
+                  {
+                    "group": "Webhooks",
+                    "pages": [
+                      "api-reference/webhooks/list-webhooks",
+                      "api-reference/webhooks/register-a-webhook",
+                      "api-reference/webhooks/get-a-webhook",
+                      "api-reference/webhooks/delete-a-webhook",
+                      "api-reference/webhooks/update-a-webhook"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "Support",
+        "href": "mailto:support@byveya.com",
+        "icon": "envelope"
+      },
+      {
+        "anchor": "Status",
+        "href": "https://status.byveya.com",
+        "icon": "circle-check"
+      }
+    ]
+  },
+  "logo": {
+    "light": "logo/light.svg",
+    "dark": "logo/dark.svg"
+  },
+  "api": {
+    "openapi": "openapi.yaml"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "ByVeya",
+        "href": "https://byveya.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API Key",
+      "href": "https://byveya.com/admin"
+    }
+  },
+  "footer": {
+    "socials": {
+      "website": "https://byveya.com"
+    }
+  }
+}
