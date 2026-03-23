@@ -2,10 +2,10 @@
   "$schema": "https://mintlify.com/schema.json",
   "name": "ByVeya Platform API",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "logo/light.svg",
+    "dark": "logo/dark.svg"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "favicon.svg",
   "colors": {
     "primary": "#6C3AE3",
     "light": "#A78BFA",
@@ -117,7 +117,7 @@
       ]
     }
   ],
-  "openapi": "/openapi.yaml",
+  "openapi": "openapi.yaml",
   "footerSocials": {
     "website": "https://byveya.com"
   }
