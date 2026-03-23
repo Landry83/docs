@@ -66,44 +66,52 @@
       "pages": [
         {
           "group": "Platform",
-          "pages": ["api-reference/platform/me"]
+          "pages": [
+            "api-reference/platform/get-authenticated-platform-info"
+          ]
         },
         {
           "group": "Marketing",
           "pages": [
-            "api-reference/marketing/list-campaigns",
-            "api-reference/marketing/create-campaign",
-            "api-reference/marketing/get-campaign"
+            "api-reference/marketing/list-email-campaigns",
+            "api-reference/marketing/create-an-email-campaign",
+            "api-reference/marketing/get-a-campaign"
           ]
         },
         {
           "group": "Social",
           "pages": [
-            "api-reference/social/list-posts",
-            "api-reference/social/schedule-post",
-            "api-reference/social/analytics"
+            "api-reference/social/list-social-posts",
+            "api-reference/social/schedule-a-social-post",
+            "api-reference/social/get-social-analytics-summary"
           ]
         },
         {
           "group": "SMS",
-          "pages": ["api-reference/sms/send"]
+          "pages": [
+            "api-reference/sms/send-an-sms"
+          ]
         },
         {
           "group": "Email",
-          "pages": ["api-reference/email/send"]
+          "pages": [
+            "api-reference/email/send-a-transactional-email"
+          ]
         },
         {
           "group": "Letters",
-          "pages": ["api-reference/letters/generate"]
+          "pages": [
+            "api-reference/letters/generate-branded-letters"
+          ]
         },
         {
           "group": "Webhooks",
           "pages": [
-            "api-reference/webhooks/list",
-            "api-reference/webhooks/create",
-            "api-reference/webhooks/get",
-            "api-reference/webhooks/update",
-            "api-reference/webhooks/delete"
+            "api-reference/webhooks/list-webhooks",
+            "api-reference/webhooks/register-a-webhook",
+            "api-reference/webhooks/get-a-webhook",
+            "api-reference/webhooks/delete-a-webhook",
+            "api-reference/webhooks/update-a-webhook"
           ]
         }
       ]
