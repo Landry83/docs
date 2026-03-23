@@ -1,0 +1,961 @@
+openapi: 3.1.0
+
+info:
+  title: ByVeya Platform API
+  version: "1.0.0"
+  description: |
+    The ByVeya Platform API lets your applications access the full suite of
+    ByVeya tools — marketing campaigns, social media scheduling, SMS,
+    transactional email, letter generation, and webhooks — through a single,
+    authenticated REST interface.
+
+    **Base URL:** `https://byveya.com/api/v1`
+
+    All requests must include an `x-api-key` header containing your platform
+    API key. Keys are prefixed `bv_live_…` and are issued from the ByVeya
+    admin portal.
+
+  contact:
+    name: ByVeya Support
+    url: https://byveya.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://byveya.com/api/v1
+    description: Production
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: >
+        Your platform API key — format `bv_live_<32-char-random>`.
+        Obtain yours from the ByVeya admin portal.
+
+  schemas:
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+        details:
+          type: string
+          description: Additional context (provider errors, validation failures, etc.).
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    PlatformMe:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        platform_name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        rate_limit:
+          type: object
+          properties:
+            requests_per_minute:
+              type: integer
+            used_this_minute:
+              type: integer
+            remaining:
+              type: integer
+        stats:
+          type: object
+          properties:
+            total_requests:
+              type: integer
+        metadata:
+          type: object
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [queued, scheduled, sending, sent, cancelled]
+        subject:
+          type: string
+        from_name:
+          type: string
+        from_email:
+          type: string
+        scheduled_at:
+          type: string
+          format: date-time
+          nullable: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        recipient_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    SocialPost:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        network:
+          type: string
+          enum: [instagram, twitter, linkedin, facebook]
+        caption:
+          type: string
+          nullable: true
+        media_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        hashtags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [queued, published, failed, cancelled]
+        scheduled_at:
+          type: string
+          format: date-time
+          nullable: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        external_post_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    SmsResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id:
+          type: string
+          format: uuid
+        to:
+          type: string
+        twilio_sid:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [sent, failed]
+
+    EmailResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id:
+          type: string
+          format: uuid
+        resend_id:
+          type: string
+          nullable: true
+        to:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [sent, failed]
+
+    Letter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_name:
+          type: string
+        pdf_url:
+          type: string
+        qr_code_id:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+          description: >
+            Event names this hook subscribes to. Empty array means all events.
+        is_active:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+        last_fired_at:
+          type: string
+          format: date-time
+          nullable: true
+        failure_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        response_status:
+          type: integer
+          nullable: true
+        delivered:
+          type: boolean
+        duration_ms:
+          type: integer
+          nullable: true
+        attempt:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+
+paths:
+
+  # ── Platform ──────────────────────────────────────────────────────────────
+
+  /platforms/me:
+    get:
+      operationId: getPlatformMe
+      summary: Get authenticated platform info
+      description: >
+        Returns the name, permissions, current rate-limit usage, and lifetime
+        request stats for the API key used in this request.
+      tags: [Platform]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/PlatformMe"
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ── Marketing ─────────────────────────────────────────────────────────────
+
+  /marketing/campaigns:
+    get:
+      operationId: listCampaigns
+      summary: List email campaigns
+      description: Returns a paginated list of email campaigns for this platform.
+      tags: [Marketing]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [queued, scheduled, sending, sent, cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Campaign"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: createCampaign
+      summary: Create an email campaign
+      description: >
+        Creates and queues (or schedules) a new bulk email campaign.
+        Maximum 5,000 recipients per campaign.
+      tags: [Marketing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, subject, html_content, recipients]
+              properties:
+                name:
+                  type: string
+                subject:
+                  type: string
+                from_name:
+                  type: string
+                from_email:
+                  type: string
+                html_content:
+                  type: string
+                text_content:
+                  type: string
+                recipients:
+                  type: array
+                  maxItems: 5000
+                  items:
+                    type: object
+                    required: [email]
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                      name:
+                        type: string
+                      merge_data:
+                        type: object
+                        additionalProperties:
+                          type: string
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  description: Leave empty to queue immediately.
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Campaign"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /marketing/campaigns/{id}:
+    get:
+      operationId: getCampaign
+      summary: Get a campaign
+      tags: [Marketing]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Campaign"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ── Social ────────────────────────────────────────────────────────────────
+
+  /social/posts:
+    get:
+      operationId: listSocialPosts
+      summary: List social posts
+      tags: [Social]
+      parameters:
+        - name: network
+          in: query
+          schema:
+            type: string
+            enum: [instagram, twitter, linkedin, facebook]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [queued, published, failed, cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SocialPost"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+
+    post:
+      operationId: scheduleSocialPost
+      summary: Schedule a social post
+      tags: [Social]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [network]
+              properties:
+                network:
+                  type: string
+                  enum: [instagram, twitter, linkedin, facebook]
+                caption:
+                  type: string
+                media_urls:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                hashtags:
+                  type: array
+                  items:
+                    type: string
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  description: ISO 8601 UTC. Omit to queue for immediate publish.
+                metadata:
+                  type: object
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SocialPost"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /social/analytics:
+    get:
+      operationId: getSocialAnalytics
+      summary: Get social analytics summary
+      description: Returns totals and per-network breakdowns for all social posts.
+      tags: [Social]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      published:
+                        type: integer
+                      queued:
+                        type: integer
+                      failed:
+                        type: integer
+                  by_network:
+                    type: object
+                    additionalProperties:
+                      type: integer
+
+  # ── SMS ───────────────────────────────────────────────────────────────────
+
+  /sms/send:
+    post:
+      operationId: sendSms
+      summary: Send an SMS
+      description: >
+        Sends a single SMS via Twilio. The `to` field must be an E.164 number
+        (e.g. `+447911123456`). Messages are capped at 1,600 characters.
+      tags: [SMS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to, message]
+              properties:
+                to:
+                  type: string
+                  description: E.164 format, e.g. +447911123456
+                message:
+                  type: string
+                  maxLength: 1600
+                from:
+                  type: string
+                  description: Override the sender number (must be owned by ByVeya).
+                metadata:
+                  type: object
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsResult"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "502":
+          description: Provider error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ── Email ─────────────────────────────────────────────────────────────────
+
+  /email/send:
+    post:
+      operationId: sendEmail
+      summary: Send a transactional email
+      description: >
+        Sends one transactional email via Resend. For bulk campaigns use
+        `POST /marketing/campaigns`. Maximum 50 recipients per call.
+      tags: [Email]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to, subject, html]
+              properties:
+                to:
+                  oneOf:
+                    - type: string
+                      format: email
+                    - type: array
+                      maxItems: 50
+                      items:
+                        type: string
+                        format: email
+                from:
+                  type: string
+                  description: Override sender address.
+                from_name:
+                  type: string
+                subject:
+                  type: string
+                html:
+                  type: string
+                text:
+                  type: string
+                reply_to:
+                  type: string
+                  format: email
+                cc:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                bcc:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                metadata:
+                  type: object
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailResult"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "502":
+          description: Provider error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ── Letters ───────────────────────────────────────────────────────────────
+
+  /letters/generate:
+    post:
+      operationId: generateLetters
+      summary: Generate branded letters
+      description: >
+        Generates print-ready branded letter PDFs with optional QR codes
+        for up to 20 recipients per call.
+      tags: [Letters]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recipients]
+              properties:
+                recipients:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: object
+                    required: [company_name, address]
+                    properties:
+                      company_name:
+                        type: string
+                      company_number:
+                        type: string
+                      address:
+                        type: object
+                        required: [line1, city, postcode]
+                        properties:
+                          line1:
+                            type: string
+                          line2:
+                            type: string
+                          city:
+                            type: string
+                          postcode:
+                            type: string
+                      qr_code_url:
+                        type: string
+                        format: uri
+                      merge_data:
+                        type: object
+                        additionalProperties:
+                          type: string
+                template_id:
+                  type: string
+                  format: uuid
+                  description: Leave empty to use the platform's default template.
+                campaign_name:
+                  type: string
+      responses:
+        "200":
+          description: Generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  campaign_id:
+                    type: string
+                    format: uuid
+                  campaign_name:
+                    type: string
+                  letters_generated:
+                    type: integer
+                  letters:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Letter"
+                  errors:
+                    type: array
+                    items:
+                      type: string
+
+  # ── Webhooks ──────────────────────────────────────────────────────────────
+
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      summary: List webhooks
+      tags: [Webhooks]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Webhook"
+
+    post:
+      operationId: createWebhook
+      summary: Register a webhook
+      description: >
+        Registers a URL to receive event notifications. You may optionally
+        supply a `secret` — ByVeya will include an `X-ByVeya-Signature`
+        (HMAC-SHA256) header with every delivery so you can verify authenticity.
+
+        **Event types:** `letter.generated`, `letter.printed`, `sms.sent`,
+        `email.sent`, `social.post.queued`, `social.post.published`,
+        `social.post.failed`, `campaign.created`, `campaign.completed`
+      tags: [Webhooks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                events:
+                  type: array
+                  description: Leave empty to subscribe to all events.
+                  items:
+                    type: string
+                description:
+                  type: string
+                secret:
+                  type: string
+                  description: >
+                    Plain-text signing secret. Stored as a one-way hash —
+                    ByVeya never exposes the original value after this call.
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Webhook"
+                  note:
+                    type: string
+        "422":
+          description: Webhook limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /webhooks/{id}:
+    get:
+      operationId: getWebhook
+      summary: Get a webhook
+      description: Returns webhook details including the last 20 delivery attempts.
+      tags: [Webhooks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: "#/components/schemas/Webhook"
+                      - type: object
+                        properties:
+                          recent_deliveries:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/WebhookDelivery"
+
+    patch:
+      operationId: updateWebhook
+      summary: Update a webhook
+      tags: [Webhooks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                events:
+                  type: array
+                  items:
+                    type: string
+                is_active:
+                  type: boolean
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Webhook"
+
+    delete:
+      operationId: deleteWebhook
+      summary: Delete a webhook
+      tags: [Webhooks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  deleted_id:
+                    type: string
+                    format: uuid
+
+tags:
+  - name: Platform
+    description: Inspect your API key and usage stats
+  - name: Marketing
+    description: Email campaign management
+  - name: Social
+    description: Social media post scheduling and analytics
+  - name: SMS
+    description: Outbound SMS via Twilio
+  - name: Email
+    description: Transactional email via Resend
+  - name: Letters
+    description: Branded print letter generation with QR codes
+  - name: Webhooks
+    description: Register URLs to receive real-time event notifications

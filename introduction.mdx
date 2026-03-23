@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: Welcome to the ByVeya Platform API
+---
+
+# ByVeya Platform API
+
+The ByVeya Platform API gives your applications direct access to the full suite
+of ByVeya tools through a single, versioned REST interface. Whether you're
+connecting an internal project or an external SaaS platform, every feature is
+available through the same authenticated endpoint.
+
+## What you can do
+
+<CardGroup cols={2}>
+  <Card title="Marketing Campaigns" icon="megaphone" href="/api-reference/marketing/list-campaigns">
+    Create, schedule, and track bulk email campaigns with personalised merge data.
+  </Card>
+  <Card title="Social Media" icon="share-nodes" href="/api-reference/social/schedule-post">
+    Schedule posts to Instagram, Twitter, LinkedIn, and Facebook and retrieve analytics.
+  </Card>
+  <Card title="SMS" icon="message-sms" href="/api-reference/sms/send">
+    Send individual SMS messages via Twilio with full delivery tracking.
+  </Card>
+  <Card title="Transactional Email" icon="envelope" href="/api-reference/email/send">
+    Send transactional emails via Resend with CC, BCC, and reply-to support.
+  </Card>
+  <Card title="Letter Generation" icon="file-pdf" href="/api-reference/letters/generate">
+    Generate branded, print-ready letter PDFs with QR codes for up to 20 recipients per call.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/guides/webhooks">
+    Register HTTP endpoints to receive real-time event notifications for any action.
+  </Card>
+</CardGroup>
+
+## Base URL
+
+All API requests are made to:
+
+```
+https://byveya.com/api/v1
+```
+
+## Versioning
+
+The API is versioned via the URL path (`/api/v1`). Breaking changes will
+always be released under a new version. The current version will remain
+supported for a minimum of 12 months after a new major version is published.
+
+## Next steps
+
+<Steps>
+  <Step title="Get your API key">
+    Head to the [ByVeya admin portal](https://byveya.com/admin) and generate
+    a platform API key with the permissions you need.
+  </Step>
+  <Step title="Follow the Quickstart">
+    Send your first request in under two minutes — [Quickstart →](/quickstart)
+  </Step>
+  <Step title="Explore the reference">
+    Browse the full endpoint reference using the sidebar on the left.
+  </Step>
+</Steps>

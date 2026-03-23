@@ -1,0 +1,78 @@
+---
+title: Authentication
+description: How to authenticate requests to the ByVeya Platform API
+---
+
+## API Keys
+
+Every request to the ByVeya Platform API must include your API key in the
+`x-api-key` request header:
+
+```http
+x-api-key: bv_live_AbCdEfGhIjKlMnOpQrStUvWxYz012345
+```
+
+Keys are prefixed with `bv_live_` followed by 32 random alphanumeric
+characters. They are issued per platform in the
+[ByVeya admin portal](https://byveya.com/admin).
+
+## How keys are stored
+
+ByVeya stores only a **SHA-256 hash** of your key — the original value is
+never persisted. This means:
+
+- If you lose your key, you must generate a new one.
+- Only you ever know the raw key value.
+- A fast lookup is performed using the first 12 characters as a prefix,
+  then the full hash is compared before a key is accepted.
+
+## Key lifecycle
+
+| Action | How |
+|--------|-----|
+| Generate | ByVeya admin portal → Platform API Keys |
+| Revoke | Toggle the key inactive in the admin portal |
+| Rotate | Generate a new key, update your integration, then revoke the old one |
+
+## Security best practices
+
+<AccordionGroup>
+  <Accordion title="Never expose your key client-side">
+    API keys carry full platform permissions. Never include them in frontend
+    JavaScript, mobile app bundles, or public repositories. Always call the API
+    from your server or a secure serverless function.
+  </Accordion>
+  <Accordion title="Use environment variables">
+    Store keys in environment variables (e.g. `BYVEYA_API_KEY`) rather than
+    hard-coding them. Tools like [Doppler](https://doppler.com) or
+    [Infisical](https://infisical.com) can manage secrets across environments.
+  </Accordion>
+  <Accordion title="Rotate keys periodically">
+    Generate a replacement key, deploy it, verify it's working, then revoke
+    the old key. The changeover is zero-downtime.
+  </Accordion>
+  <Accordion title="Scope permissions tightly">
+    Each key has a specific set of permissions (e.g. `sms:send`, `social:posts`).
+    Request only the permissions your integration actually needs. See
+    [Permissions](/guides/permissions) for the full list.
+  </Accordion>
+</AccordionGroup>
+
+## Error responses
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | Key is missing or the value does not match any active key |
+| `403 Forbidden` | Key is valid but has been deactivated, or lacks the required permission |
+
+```json
+{
+  "error": "Missing x-api-key header"
+}
+```
+
+```json
+{
+  "error": "Insufficient permissions — social:posts required"
+}
+```

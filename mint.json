@@ -1,0 +1,116 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "ByVeya Platform API",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#6C3AE3",
+    "light": "#A78BFA",
+    "dark": "#4F1FBF",
+    "anchors": {
+      "from": "#6C3AE3",
+      "to": "#A78BFA"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "ByVeya",
+      "url": "https://byveya.com"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get API Key",
+    "url": "https://byveya.com/admin"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Support",
+      "icon": "envelope",
+      "url": "mailto:support@byveya.com"
+    },
+    {
+      "name": "Status",
+      "icon": "circle-check",
+      "url": "https://status.byveya.com"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "authentication"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/permissions",
+        "guides/rate-limits",
+        "guides/webhooks",
+        "guides/errors"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        {
+          "group": "Platform",
+          "pages": ["api-reference/platform/me"]
+        },
+        {
+          "group": "Marketing",
+          "pages": [
+            "api-reference/marketing/list-campaigns",
+            "api-reference/marketing/create-campaign",
+            "api-reference/marketing/get-campaign"
+          ]
+        },
+        {
+          "group": "Social",
+          "pages": [
+            "api-reference/social/list-posts",
+            "api-reference/social/schedule-post",
+            "api-reference/social/analytics"
+          ]
+        },
+        {
+          "group": "SMS",
+          "pages": ["api-reference/sms/send"]
+        },
+        {
+          "group": "Email",
+          "pages": ["api-reference/email/send"]
+        },
+        {
+          "group": "Letters",
+          "pages": ["api-reference/letters/generate"]
+        },
+        {
+          "group": "Webhooks",
+          "pages": [
+            "api-reference/webhooks/list",
+            "api-reference/webhooks/create",
+            "api-reference/webhooks/get",
+            "api-reference/webhooks/update",
+            "api-reference/webhooks/delete"
+          ]
+        }
+      ]
+    }
+  ],
+  "openapi": "/openapi.yaml",
+  "footerSocials": {
+    "website": "https://byveya.com"
+  }
+}

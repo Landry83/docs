@@ -1,80 +1,104 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Make your first ByVeya API request in under two minutes
 ---
 
-## Get started in three steps
+## 1. Get your API key
 
-Get your documentation site running locally and make your first customization.
+Sign in to the [ByVeya admin portal](https://byveya.com/admin), navigate to
+**Platform API Keys**, and create a new key. You'll see the full key **once** —
+copy it somewhere safe immediately.
 
-### Step 1: Set up your local environment
+Your key looks like this:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+```
+bv_live_AbCdEfGhIjKlMnOpQrStUvWxYz012345
+```
 
-### Step 2: Deploy your changes
+## 2. Make a test request
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Verify your key by calling the `platforms/me` endpoint:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<CodeGroup>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash cURL
+curl https://byveya.com/api/v1/platforms/me \
+  -H "x-api-key: bv_live_YOUR_KEY_HERE"
+```
 
-### Step 3: Go live
+```javascript Node.js
+const res = await fetch("https://byveya.com/api/v1/platforms/me", {
+  headers: { "x-api-key": "bv_live_YOUR_KEY_HERE" },
+});
+const data = await res.json();
+console.log(data);
+```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```python Python
+import httpx
 
-## Next steps
+r = httpx.get(
+    "https://byveya.com/api/v1/platforms/me",
+    headers={"x-api-key": "bv_live_YOUR_KEY_HERE"},
+)
+print(r.json())
+```
 
-Now that you have your docs running, explore these key features:
+```php PHP
+$ch = curl_init("https://byveya.com/api/v1/platforms/me");
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["x-api-key: bv_live_YOUR_KEY_HERE"]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+echo curl_exec($ch);
+```
 
-<CardGroup cols={2}>
+</CodeGroup>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+**Response:**
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "platform_name": "My App",
+  "permissions": ["sms:send", "email:send", "social:posts", "marketing:campaigns"],
+  "rate_limit": {
+    "requests_per_minute": 60,
+    "used_this_minute": 1,
+    "remaining": 59
+  },
+  "stats": {
+    "total_requests": 1
+  }
+}
+```
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+## 3. Send your first SMS
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+```bash
+curl -X POST https://byveya.com/api/v1/sms/send \
+  -H "x-api-key: bv_live_YOUR_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "+447911123456",
+    "message": "Hello from ByVeya! 🚀"
+  }'
+```
 
-</CardGroup>
+## 4. Schedule a social post
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+```bash
+curl -X POST https://byveya.com/api/v1/social/posts \
+  -H "x-api-key: bv_live_YOUR_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "network": "instagram",
+    "caption": "Exciting news coming soon! 🔥",
+    "hashtags": ["announcement", "byveya"],
+    "scheduled_at": "2026-04-01T09:00:00Z"
+  }'
+```
+
+## What's next?
+
+- Read the [Authentication guide](/authentication) for security best practices
+- Learn about [Permissions](/guides/permissions) to understand what each key can do
+- Set up [Webhooks](/guides/webhooks) to receive real-time event notifications

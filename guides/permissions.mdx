@@ -1,0 +1,49 @@
+---
+title: Permissions
+description: Understand and configure your platform's API permissions
+---
+
+## Overview
+
+Every API key is issued with a specific set of permissions. Calling an endpoint
+without the required permission returns a `403 Forbidden` response.
+
+Permissions are configured when the key is created in the
+[ByVeya admin portal](https://byveya.com/admin). Contact ByVeya support to
+adjust permissions on an existing key.
+
+## Permission reference
+
+| Permission | Endpoints unlocked |
+|------------|-------------------|
+| `marketing:campaigns` | `GET /marketing/campaigns`, `POST /marketing/campaigns`, `GET /marketing/campaigns/:id` |
+| `social:posts` | `GET /social/posts`, `POST /social/posts` |
+| `social:analytics` | `GET /social/analytics` |
+| `sms:send` | `POST /sms/send` |
+| `email:send` | `POST /email/send` |
+| `letters:generate` | `POST /letters/generate` |
+| `letters:read` | `GET /letters/*` |
+| `webhooks:manage` | `GET/POST /webhooks`, `GET/PATCH/DELETE /webhooks/:id` |
+
+## Checking your permissions
+
+Call `GET /api/v1/platforms/me` at any time to see the permissions currently
+attached to your key:
+
+```json
+{
+  "permissions": [
+    "sms:send",
+    "email:send",
+    "social:posts",
+    "social:analytics",
+    "webhooks:manage"
+  ]
+}
+```
+
+## Principle of least privilege
+
+We strongly recommend requesting only the permissions your integration actually
+needs. For example, a platform that only sends SMS notifications should hold
+only `sms:send` — not `marketing:campaigns` or `letters:generate`.

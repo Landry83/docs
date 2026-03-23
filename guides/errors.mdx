@@ -1,0 +1,47 @@
+---
+title: Error Handling
+description: Standard error responses across the ByVeya Platform API
+---
+
+## Error format
+
+All errors return a JSON body with at minimum an `error` string. Some errors
+include a `details` field with additional context from the upstream provider.
+
+```json
+{
+  "error": "to and message are required"
+}
+```
+
+```json
+{
+  "error": "Failed to send SMS via provider",
+  "details": "The number +447000000000 is not a valid mobile number"
+}
+```
+
+## HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| `200 OK` | Request succeeded |
+| `201 Created` | Resource created successfully |
+| `204 No Content` | CORS preflight response |
+| `400 Bad Request` | Missing or invalid request body / parameters |
+| `401 Unauthorized` | Missing or invalid API key |
+| `403 Forbidden` | API key lacks the required permission, or key is inactive |
+| `404 Not Found` | The requested resource does not exist or belongs to a different platform |
+| `422 Unprocessable Entity` | Request is valid but cannot be processed (e.g. webhook limit reached) |
+| `429 Too Many Requests` | Rate limit exceeded — see [Rate Limits](/guides/rate-limits) |
+| `500 Internal Server Error` | Unexpected server error — contact support if this persists |
+| `502 Bad Gateway` | Upstream provider error (Twilio, Resend, etc.) — retry after a short delay |
+
+## Best practices
+
+- **Always check the status code**, not just whether the response body is present.
+- **Log the `error` field** from 4xx responses for debugging.
+- **Treat `502` as transient** — the downstream provider may be temporarily
+  unavailable. Retry with exponential back-off.
+- **Do not retry `400` or `403`** — these indicate a problem with your request
+  that won't resolve by retrying.

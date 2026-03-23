@@ -1,0 +1,64 @@
+---
+title: Rate Limits
+description: Understanding API rate limits and how to handle them
+---
+
+## Limits
+
+Requests are limited using a **60-second sliding window**. Your platform's
+limit is shown in `GET /api/v1/platforms/me`:
+
+```json
+{
+  "rate_limit": {
+    "requests_per_minute": 60,
+    "used_this_minute": 12,
+    "remaining": 48
+  }
+}
+```
+
+The default limit is **60 requests per minute**. Higher limits are available
+for platforms with enterprise agreements — contact ByVeya support.
+
+## Exceeded limit response
+
+When the limit is exceeded, the API returns `429 Too Many Requests` with a
+`Retry-After` header:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+Content-Type: application/json
+
+{
+  "error": "Rate limit exceeded",
+  "retry_after_seconds": 60
+}
+```
+
+## Handling 429s
+
+Implement exponential back-off with jitter in your integration:
+
+```javascript
+async function callWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, options);
+    if (res.status !== 429) return res;
+
+    const retryAfter = parseInt(res.headers.get("Retry-After") ?? "60", 10);
+    const jitter = Math.random() * 1000;
+    await new Promise((r) => setTimeout(r, retryAfter * 1000 + jitter));
+  }
+  throw new Error("Max retries exceeded");
+}
+```
+
+## Tips for staying within limits
+
+- **Batch where possible** — letter generation accepts up to 20 recipients per
+  call; email campaigns accept up to 5,000 recipients rather than individual sends.
+- **Use webhooks** instead of polling to avoid repeated status-check requests.
+- **Monitor your usage** via `GET /api/v1/platforms/me` and build alerting
+  before you hit the ceiling.
